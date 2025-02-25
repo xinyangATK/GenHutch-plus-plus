@@ -175,6 +175,7 @@ def build_model_tabular(args, dims, regularization_fns=None):
             divergence_fn=args.divergence_fn,
             residual=args.residual,
             rademacher=args.rademacher,
+            num_query=args.num_query,
             q_interval=args.q_interval,
         )
         cnf = layers.CNF(

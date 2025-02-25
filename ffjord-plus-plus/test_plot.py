@@ -14,64 +14,6 @@ c_list = ['k', 'b', 'g', 'r', 'c', 'y']
 labels = ['FFJORD (BF)', 'FFJORD', "FFJORD++ ($L_s$ = 1)", "FFJORD++", "FFJORD++ ($L_s$ = 20)", "FFJORD++ ($L_s$ = 50)"]
 
 log_path = []
-# log_path.append(f'exp_cn/{df[data]}/h_fix_v1/h.log')
-# log_path.append(f'exp_cn/{df[data]}/h_fix_v2/h.log')
-# log_path.append(f'exp_cn/{df[data]}/h_fix_v3/h.log')
-# log_path.append(f'exp_cn/{df[data]}/hpp_1_v2/hpp.log')
-
-# log_path.append(f'exp_cn/{df[data]}/h_v1/h.log')
-# log_path.append(f'exp_cn/{df[data]}/h_v2/h.log')
-# log_path.append(f'exp_cn/{df[data]}/h_v3/h.log')
-# log_path.append(f'exp_cn/{df[data]}/hpp_1_v1/hpp.log')
-# log_path.append(f'exp_cn/{df[data]}/hpp_1_v2/hpp.log')
-# log_path.append(f'exp_cn/{df[data]}/hpp_1_v3/hpp.log')
-# log_path.append(f'exp_cn/{df[data]}/hpp_v1/hpp.log')
-# log_path.append(f'exp_cn/{df[data]}/hpp_v2/hpp.log')
-# log_path.append(f'exp_cn/{df[data]}/hpp_v3/hpp.log')
-# log_path.append(f'exp_cn/{df[data]}/hpp_20_v1/hpp.log')
-# log_path.append(f'exp_cn/{df[data]}/hpp_20_v2/hpp.log')
-# log_path.append(f'exp_cn/{df[data]}/hpp_20_v3/hpp.log')
-# log_path.append(f'exp_cn/{df[data]}/hpp_50_v1/hpp.log')
-# log_path.append(f'exp_cn/{df[data]}/hpp_50_v2/hpp.log')
-# log_path.append(f'exp_cn/{df[data]}/hpp_50_v3/hpp.log')
-
-
-# log_path.append(f'exp_cn/{df[data]}/bf_v1/bf.log')
-# log_path.append(f'exp_cn/{df[data]}/bf_v2/bf.log')
-# log_path.append(f'exp_cn/{df[data]}/bf_v3/bf.log')
-# log_path.append(f'exp_cn/{df[data]}/h_v1/h.log')
-# log_path.append(f'exp_cn/{df[data]}/h_v2/h.log')
-# log_path.append(f'exp_cn/{df[data]}/h_v3/h.log')
-# log_path.append(f'exp_cn/{df[data]}/hpp_v1/hpp.log')
-# log_path.append(f'exp_cn/{df[data]}/hpp_v2/hpp.log')
-
-# log_path.append(f'exp_cn/{df[data]}/hpp_v3/hpp.log')
-# log_path.append(f'exp_cn/{df[data]}/h/h.log')
-# log_path.append(f'exp_cn/{df[data]}/hpp/hpp.log')
-# log_path.append(f'exp_cn/{df[data]}/h_2e_4_v1/h.log')
-# log_path.append(f'exp_cn/{df[data]}/h_2e_4_v2/h.log')
-# log_path.append(f'exp_cn/{df[data]}/h_2e_4_v3/h.log')
-# log_path.append(f'exp_cn/{df[data]}/hpp_2e_4_v1/hpp.log')
-# log_path.append(f'exp_cn/{df[data]}/hpp_2e_4_v2/hpp.log')
-# log_path.append(f'exp_cn/{df[data]}/hpp_2e_4_v3/hpp.log')
-
-log_path.append(f'exp_cn/{df[data]}/bf_v1/bf.log')
-log_path.append(f'exp_cn/{df[data]}/bf_v2/bf.log')
-log_path.append(f'exp_cn/{df[data]}/bf_v3/bf.log')
-
-# log_path.append(f'exp_cn/{df[data]}/h_2e_4_v1/h.log')
-# log_path.append(f'exp_cn/{df[data]}/h_2e_4_v2/h.log')
-# log_path.append(f'exp_cn/{df[data]}/h_2e_4_v3/h.log')
-# log_path.append(f'exp_cn/{df[data]}/hpp_2e_4_v1/hpp.log')
-# log_path.append(f'exp_cn/{df[data]}/hpp_2e_4_v2/hpp.log')
-# log_path.append(f'exp_cn/{df[data]}/hpp_2e_4_v3/hpp.log')
-
-log_path.append(f'exp_cn/{df[data]}/h_3e_4_v1/h.log')
-log_path.append(f'exp_cn/{df[data]}/h_3e_4_v2/h.log')
-log_path.append(f'exp_cn/{df[data]}/h_3e_4_v3/h.log')
-log_path.append(f'exp_cn/{df[data]}/hpp_3e_4_v1/hpp.log')
-log_path.append(f'exp_cn/{df[data]}/hpp_3e_4_v2/hpp.log')
-log_path.append(f'exp_cn/{df[data]}/hpp_3e_4_v3/hpp.log')
 
 test_metrics = []
 start = 0

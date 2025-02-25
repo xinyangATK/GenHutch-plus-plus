@@ -12,21 +12,15 @@ import numpy as np
 import lib.toy_data as toy_data
 import lib.utils as utils
 from lib.visualize_flow import visualize_transform, scale_global_axis
-import lib.layers.odefunc_v1 as odefunc
+import lib.layers.odefunc as odefunc
 
 from train_misc import standard_normal_logprob
 from train_misc import set_cnf_options, count_nfe, count_parameters, count_total_time
 from train_misc import add_spectral_norm, spectral_norm_power_iteration
 from train_misc import create_regularization_fns, get_regularization, append_regularization_to_log
 from train_misc import build_model_tabular
-from thop import profile
-from thop import clever_format
 
-from diagnostics.viz_toy import save_trajectory, trajectory_to_video
-from lib.evaluation import wasserstein
-from lib.ema import load_ema, load_ema_from_ckpt, ema_scope
 
-# nohup python -u train_toy.py --divergence_fn hutchplusplus_m  --save exp_checkerboard_hpp_m >>exp_checkerboard_hpp_m/checkeerboard_hpp_m.log &
 SOLVERS = ["dopri5", "bdf", "rk4", "midpoint", 'adams', 'explicit_adams', 'fixed_adams', 'euler']
 parser = argparse.ArgumentParser('Continuous Normalizing Flow')
 parser.add_argument(
@@ -44,8 +38,8 @@ parser.add_argument('--dims', type=str, default='64-64-64')
 parser.add_argument("--num_blocks", type=int, default=1, help='Number of stacked CNFs.')
 parser.add_argument('--time_length', type=float, default=1.)
 parser.add_argument('--train_T', type=eval, default=True)
-parser.add_argument("--divergence_fn", type=str, default="approximate", choices=["brute_force", "approximate", "approximate_m", "hutchplusplus", "hutchplusplus_m", "na_hutchplusplus"])
-# parser.add_argument('--num_query', type=int, default=2)
+parser.add_argument("--divergence_fn", type=str, default="approximate", choices=["brute_force", "approximate", "approximate_m", "hutchplusplus", "hutchplusplus_m",])
+parser.add_argument('--num_query', type=int, default=1)
 parser.add_argument("--nonlinearity", type=str, default="tanh", choices=odefunc.NONLINEARITIES)
 
 parser.add_argument('--solver', type=str, default='midpoint', choices=SOLVERS)
@@ -79,7 +73,7 @@ parser.add_argument('--JdiagFrobint', type=float, default=None, help="int_t ||df
 parser.add_argument('--JoffdiagFrobint', type=float, default=None, help="int_t ||df/dx - df_i/dx_i||_F")
 
 parser.add_argument('--seeds', type=list, default=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
-parser.add_argument('--save', type=str, default='exp_checkerboard_t')
+parser.add_argument('--save', type=str, default='exp_checkerboard')
 parser.add_argument('--viz_freq', type=int, default=100)
 parser.add_argument('--val_freq', type=int, default=100)
 parser.add_argument('--eval_freq', type=int, default=100)
@@ -177,10 +171,6 @@ if __name__ == '__main__':
 
         loss = compute_loss(args, model)
 
-        flops, params = profile(compute_loss, inputs=(args, model))
-        flops, params = clever_format([flops, params], "%.3f")
-        print(f"FLOPs: {flops}, Params: {params}")
-
         loss_meter.update(loss.item())
 
         if len(regularization_coeffs) > 0:
@@ -257,22 +247,7 @@ if __name__ == '__main__':
                 utils.makedirs(os.path.dirname(fig_filename))
                 plt.savefig(fig_filename)
                 plt.close()
-
-                # if itr % args.eval_freq == 0:
-                #     # eval_target_data = torch.from_numpy(eval_target_data).float()
-                #     w_res = []
-                #     for seed in args.seeds[:3]:
-                #         torch.manual_seed(seed)
-                #         np.random.seed(seed)
-                #         z = torch.randn(npts**2, 2).type(torch.float32).to(device)
-                #         eval_target_data = sample_fn(z).cpu()
-                #         w_res.append(wasserstein(eval_source_data, eval_target_data))
-                #     w_res_mean = np.mean(w_res)
-                #     w_res_std = np.std(w_res)
-                #     log_message = '[TEST] Iter {:04d} | wasserstein-2 distance maen {:.6f} | std {:.6f}'.format(itr, w_res_mean, w_res_std)
-                #     logger.info(log_message)
-
-                
+    
                 model.train()
         
             
@@ -281,8 +256,3 @@ if __name__ == '__main__':
 
     logger.info('Training has finished.')
 
-    # save_traj_dir = os.path.join(args.save, 'trajectory')
-    # logger.info('Plotting trajectory to {}'.format(save_traj_dir))
-    # data_samples = toy_data.inf_train_gen(args.data, batch_size=2000)
-    # save_trajectory(model, data_samples, save_traj_dir, device=device)
-    # trajectory_to_video(save_traj_dir)

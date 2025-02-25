@@ -53,8 +53,6 @@ def divergence_approx(f, y, e=None):
     return approx_tr_dzdx
 
 
-
-
 def sample_rademacher_like(y):
     return torch.randint(low=0, high=2, size=y.shape).to(y) * 2 - 1
 
@@ -82,7 +80,7 @@ class Lambda(nn.Module):
     def forward(self, x):
         return self.f(x)
     
-def divergence_hutchplusplus(f, y, S=None, G=None, AS_implement='jvp_'):
+def divergence_hutchplusplus(f, y, S=None, G=None, use_current_q=True, pre_Q=None):
 
     '''
         Implementation of Hutch++ with vector-queries.
@@ -92,33 +90,20 @@ def divergence_hutchplusplus(f, y, S=None, G=None, AS_implement='jvp_'):
     if G is None:
         G = S.detach().clone()  # [bs, d], sample_gaussian_like(e)
 
-    if AS_implement == 'bf_':
-        # brute_force
-        # step 1: conmpute complete jacobian matrix 
-        # step 2: Jacobian-Vector Product by torch.bmm()
-        dzdx = _get_minibatch_jacobian(f, y)  
-        dzdx_S = torch.bmm(dzdx, S.unsqueeze(-1))  # [bs, d, m/3=1]
-    elif AS_implement == 'db_':
-        # double backward
-        v = torch.ones_like(f, requires_grad=True)
-        vjp = torch.autograd.grad(f, y, grad_outputs=v, create_graph=True)[0]
-        dzdx_S = torch.autograd.grad(vjp, v, grad_outputs=S, create_graph=True)[0]
-        dzdx_S = dzdx_S.unsqueeze(-1)
-    elif AS_implement == 'jvp_':
+    if use_current_q:
         dzdx_S = jvp(f, y, S, create_graph=True)
         dzdx_S = dzdx_S.unsqueeze(-1)
-    else:
-        raise NameError("The implement method must be in ['bf_', 'db_', 'jvp_']")
 
-    [Q, _] = torch.linalg.qr(dzdx_S, mode='reduced')  # [bs, d, m/3=1]
-    
-    ## detach() ?
-    # Q = Q.detach()
-    
-    # update G = G - Q @ (Q^T @ G)
+        [Q, _] = torch.linalg.qr(dzdx_S, mode='reduced')  # [bs, d, m/3=1]
+    else:
+        assert pre_Q is not None
+        Q = pre_Q.unsqueeze(-1).detach()
+        # update G = G - Q @ (Q^T @ G)
+        # Chenck detach() ?
     G = G.unsqueeze(-1) - torch.bmm(Q, torch.bmm(Q.permute(0, 2, 1), G.unsqueeze(-1)))  # [bs, d, m/3=1]
     G = G.squeeze(-1)  # [bs, d]
     Q = Q.squeeze(-1)  # [bs, d]
+
 
     # compute tr(Q^T @ A @ Q)
     Q_dzdx = torch.autograd.grad(f, y, Q, create_graph=True)[0]
@@ -134,7 +119,7 @@ def divergence_hutchplusplus(f, y, S=None, G=None, AS_implement='jvp_'):
     approx_tr_dzdx = trace_1 + trace_2
 
 
-    return approx_tr_dzdx
+    return approx_tr_dzdx, Q
 
 def divergence_hutchplusplus_m(f, y, S=None, G=None, AS_implement='jvp_'):
 
@@ -193,13 +178,11 @@ def divergence_hutchplusplus_m(f, y, S=None, G=None, AS_implement='jvp_'):
         Q_dzdx_Q = torch.bmm(Q.permute(0, 2, 1), dzdx_Q_full)
         index_Q = torch.arange(Q_dzdx_Q.size(-1))
         diagonal_1 = Q_dzdx_Q[:, index_Q, index_Q]
-        # diagonal_1 = Q_dzdx_Q.view(Q_dzdx_Q.shape[0], -1)[:, ::Q_dzdx_Q.shape[1] + 1]
         trace_1 = torch.sum(diagonal_1, 1)
 
         G_dzdx_G = torch.bmm(G.permute(0, 2, 1), dzdx_G_full)
         index_G = torch.arange(G_dzdx_G.size(-1))
         diagonal_2 = G_dzdx_G[:, index_G, index_G]
-        # diagonal_2 = G_dzdx_G.view(G_dzdx_G.shape[0], -1)[:, ::G_dzdx_G.shape[1] + 1]
         trace_2 = torch.sum(diagonal_2, 1)
         
 
@@ -229,39 +212,6 @@ def divergence_approx_m(f, y, e=None, mode='loop'):
         tr = None
 
     return tr
-
-
-def divergence_na_hutchplusplus(f, y, S=None, R=None, G=None):
-
-    '''
-        Implementation of NA-Hutch++
-        S.shape  = [bs, d]
-        R.shape  = [bs, d]
-        G.shape  = [bs, d]
-    '''
-
-    Z= jvp(f, y, R, create_graph=True)
-    Z = Z.unsqueeze(-1)
-    W = jvp(f, y, S, create_graph=True)
-    W = W.unsqueeze(-1)
-
-    pinv_SZ = torch.linalg.pinv(torch.bmm(S.unsqueeze(-1).permute(0, 2, 1), Z))
-    pinv_SZ = pinv_SZ.detach()  # It will cost infinite time to backward the gradient without tensor.detach()
-    
-    WZ = torch.bmm(W.permute(0, 2, 1), Z)
-    # WG = torch.bmm(W.permute(0, 2, 1), G.unsqueeze(-1))
-    GZ = torch.bmm(G.unsqueeze(-1).permute(0, 2, 1), Z)
-    trace_1 = (pinv_SZ * WZ).view(y.shape[0], -1).sum(dim=1)
-    
-    G_dzdx = torch.autograd.grad(f, y, G, create_graph=True)[0]
-    G_dzdx_G = G_dzdx * G
-    trace_2 = G_dzdx_G.view(y.shape[0], -1).sum(dim=1)
-    
-    trace_3 = (torch.bmm(torch.bmm(GZ * pinv_SZ, W.permute(0, 2, 1)), G.unsqueeze(-1))).view(y.shape[0], -1).sum(dim=1)
-
-    approx_tr_dzdx = trace_1 + (trace_2 - trace_3) / 3.
-
-    return approx_tr_dzdx
 
 NONLINEARITIES = {
     "tanh": nn.Tanh(),
@@ -437,7 +387,7 @@ class AutoencoderDiffEqNet(nn.Module):
 
 class ODEfunc(nn.Module):
 
-    def __init__(self, diffeq, divergence_fn="approximate", residual=False, rademacher=False):
+    def __init__(self, diffeq, divergence_fn="approximate", residual=False, rademacher=False, num_query=1, q_interval=1):
         super(ODEfunc, self).__init__()
         assert divergence_fn in ("brute_force", "approximate", "approximate_m", "hutchplusplus", "hutchplusplus_m", "na_hutchplusplus")
 
@@ -456,14 +406,18 @@ class ODEfunc(nn.Module):
             self.divergence_fn = divergence_hutchplusplus
         elif divergence_fn == "hutchplusplus_m":
             self.divergence_fn = divergence_hutchplusplus_m
-        elif divergence_fn == "na_hutchplusplus":
-            self.divergence_fn = divergence_na_hutchplusplus
 
+        self.use_current_q = False
+        self.q_interval = q_interval
+        self.pre_Q = [None,]
+        self.m = num_query
         self.register_buffer("_num_evals", torch.tensor(0.))
 
     def before_odeint(self, e=None):
         self._e = e
         self._num_evals.fill_(0)
+        self.use_current_q = False
+        self.pre_Q = [None,]
 
     def num_evals(self):
         return self._num_evals.item()
@@ -475,7 +429,11 @@ class ODEfunc(nn.Module):
         # increment num evals
         self._num_evals += 1
 
-        # if self._num_evals
+        if self._num_evals % self.q_interval == 0 or self._num_evals == 1 or self._num_evals == 100:
+            self.use_current_q = True
+        else:
+            self.use_current_q = False
+
         # convert to tensor
         t = torch.tensor(t).type_as(y)
         batchsize = y.shape[0]
@@ -487,9 +445,8 @@ class ODEfunc(nn.Module):
                 self._e_1 = sample_rademacher_like(y)
             else:
                 if self.div_fn_name in ['hutchplusplus_m', "approximate_m"]:
-                    m = 2
-                    self._e = sample_gaussian_like(y.unsqueeze(-1).expand(-1, -1, m))
-                    self._e_1 = sample_gaussian_like(y.unsqueeze(-1).expand(-1, -1, m))
+                    self._e = sample_gaussian_like(y.unsqueeze(-1).expand(-1, -1, self.m))
+                    self._e_1 = sample_gaussian_like(y.unsqueeze(-1).expand(-1, -1, self.m))
                 else:
                     self._e = sample_gaussian_like(y)
                     self._e_1 = sample_gaussian_like(y)
@@ -506,11 +463,10 @@ class ODEfunc(nn.Module):
                 divergence = divergence_bf(dy, y, e=self._e).view(batchsize, 1)
             else:
                 if self.div_fn_name in ['hutchplusplus', 'hutchplusplus_m']:
-
-                    divergence = self.divergence_fn(dy, y, S=self._e, G = self._e_1).view(batchsize, 1)
-
-                elif self.div_fn_name == 'na_hutchplusplus':
-                    divergence = self.divergence_fn(dy, y, S=self._e, R=self._e_1, G = self._e_2).view(batchsize, 1)
+                    divergence, cur_Q = self.divergence_fn(dy, y, S=self._e, G = self._e_1, use_current_q=self.use_current_q, pre_Q=self.pre_Q[-1])
+                    divergence = divergence.view(batchsize, 1)
+                    if self.q_interval > 1:
+                        self.pre_Q.append(cur_Q)
                 else:
                     # brute_force or hutchinson's estimator
                     divergence = self.divergence_fn(dy, y, e=self._e).view(batchsize, 1)

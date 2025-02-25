@@ -114,8 +114,6 @@ def plt_flow_samples(prior_sample, transform, ax, npts=100, memory=100, title="$
 
 
 def plt_samples(samples, ax, npts=100, title="$x ~ p(x)$"):
-    # samples[:, 0] /= SCALE[0]
-    # samples[:, 1] /= SCALE[1]
     ax.hist2d(samples[:, 0], samples[:, 1], range=[[LOW * SCALE[0], HIGH * SCALE[0]], [LOW, HIGH]], bins=npts)
     ax.invert_yaxis()
     ax.set_aspect(SCALE[0] / SCALE[1])

@@ -1,56 +1,37 @@
-# Free-form Jacobian of Reversible Dynamics (FFJORD)
+# FFJORD++ (Simulations experiments in our paper)
 
-Code for reproducing the experiments in the paper:
+We validated **FFJORD++** on several toy distributions.
 
-> Will Grathwohl*, Ricky T. Q. Chen*, Jesse Bettencourt, Ilya Sutskever, David Duvenaud. "FFJORD: Free-form Continuous Dynamics for Scalable Reversible Generative Models." _International Conference on Learning Representations_ (2019).
-> [[arxiv]](https://arxiv.org/abs/1810.01367) [[bibtex]](http://www.cs.toronto.edu/~rtqichen/bibtex/ffjord.bib)
+<a name="environment dependencies"></a>
+## Environment Dependencies
 
-
-## Prerequisites
-
-Install `torchdiffeq` from https://github.com/rtqichen/torchdiffeq.
+FFJORD++ is built on [FFJORD](https://arxiv.org/abs/1810.01367), please refer to the [Prerequisites](https://github.com/rtqichen/ffjord?tab=readme-ov-file#prerequisites) in **FFJORD**.
 
 ## Usage
 
-Different scripts are provided for different datasets. To see all options, use the `-h` flag.
+We provide the script for density estimation on different datasets.
 
-Toy 2d:
 ```
-python train_toy.py --data 8gaussians --dims 64-64-64 --layer_type concatsquash --save experiment1
+python train_toy.py --data 8gaussians --divergence_fn "hutchplusplus" --q_interval 10 --save experiment
 ```
+where ```--datasets``` selected from `['swissroll', '8gaussians', 'pinwheel', 'circles', 'moons', '2spirals', 'checkerboard', 'rings']`
 
-Tabular datasets from [MAF](https://github.com/gpapamak/maf):
-```
-python train_tabular.py --data miniboone --nhidden 2 --hdim_factor 20 --num_blocks 1 --nonlinearity softplus --batch_size 1000 --lr 1e-3
-```
 
-MNIST/CIFAR10:
-```
-python train_cnf.py --data mnist --dims 64,64,64 --strides 1,1,1,1 --num_blocks 2 --layer_type concat --multiscale True --rademacher True
-```
+We visualize the **density estimation comparison** during training process on `checkerboard` and `2spirals`.
 
-VAE Experiments (based on [Sylvester VAE](https://github.com/riannevdberg/sylvester-flows)):
-```
-python train_vae_flow.py --dataset mnist --flow cnf_rank --rank 64 --dims 1024-1024 --num_blocks 2
-```
+<img src="assets/cb_convergence.png" width="48%">
+<img src="assets/2s_convergence.png" width="48%">
 
-Glow / Real NVP experiments are run using `train_discrete_toy.py` and `train_discrete_tabular.py`.
+Apply differnet divergence functions for FFJORD:
+- ```divergence_fn = "bf"``` denotes brute force algorithms via computing the $\text{Tr}(\frac{\delta f}{\delta z(t)})$ directly.
+- ```divergence_fn = "approximate"``` denotes Hutchinson trace estimator using stochastic vectors to approximate the unbiased estimation $\mathbb{E}_{p(\mathbf{v})}[\mathbf{v}^\top \text{Tr}(\frac{\delta f}{\delta z(t)}) \mathbf{v}]$.
+- ```divergence_fn = "hutchplusplus"``` denotes Hutch++ trace estimator involveing a low-rank approximation to reduce variance in generative modeling.
 
-## Datasets
+We evaluate FFJORD++ with **negative log-likelihood** of density estimation during trianing process. 
 
-### Tabular (UCI + BSDS300)
-Follow instructions from https://github.com/gpapamak/maf and place them in `data/`.
+<img src="assets/X-1.png" width="73%">
+<img src="assets/accelerate.png" width="25%">
 
-### VAE datasets
-Follow instructions from https://github.com/riannevdberg/sylvester-flows and place them in `data/`.
+- Set ```q_interval = 10``` to accelerate training process while remaining density modeling quality.
+- Set ```--x_scale``` and ```--y_scale``` to build datasets with various scales for training.
 
-## Bespoke Flows
-
-Here's a fun script that you can use to create your own 2D flow from an image!
-```
-python train_img2d.py --img imgs/github.png --save github_flow
-```
-
-<p align="center">
-<img align="middle" src="./assets/github_flow.gif" width="400" height="400" />
-</p>
