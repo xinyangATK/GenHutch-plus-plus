@@ -7,15 +7,15 @@ By [Xinyang Liu](https://xinyangatk.github.io)\*<sup>1</sup>, [Hengrong Du](http
 \*Equal contribution
 
 <a name="why Hutch++?"></a>
-## Why Hutch++ in generative modeling?
+## Why Hutch++ in Generative Modeling?
 - Lower variance and error in trace estimation compared to Hutchinson trace estimator.
 - In generative modeling, Hutch++ is particularly effective for handling ill-conditioned matrices with large condition numbers, which commonly arise when high-dimensional data exhibits a low-dimensional structure. 
 - Our practical acceleration technique that balance frequency and accuracy, backed by theoretical guarantees.
-- Our analysis demonstrates that Hutch++ leads to generations of higher quality
+- Our analysis demonstrates that Hutch++ leads to generations of higher quality.
 
 
-<a name="code structure"></a>
-## Code structure
+<a name="code tructure"></a>
+## Code Structure
 
 We provide two separate projects of GruM for three types of graph generation tasks:
 - Simulations with Neural ODE
