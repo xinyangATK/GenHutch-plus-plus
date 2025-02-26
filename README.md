@@ -18,7 +18,7 @@ By [Xinyang Liu](https://xinyangatk.github.io)\*<sup>1</sup>, [Hengrong Du](http
 ## Code Structure
 
 We provide two separate projects of GruM for three types of graph generation tasks:
-- Simulations with Neural ODE
+- Simulations with Neural ODE model
 - Image data modeling with advanced SB-based diffusion models
 
 Each projects consists of the following:
