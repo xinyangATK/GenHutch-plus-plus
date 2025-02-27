@@ -1,4 +1,4 @@
-# [Optimal Stochastic Trace Estimation in Generative Modeling](https://openreview.net/forum?id=tYVDkoymXT&referrer=%5Bthe%20profile%20of%20Ruqi%20Zhang%5D(%2Fprofile%3Fid%3D~Ruqi_Zhang1)) (AISTATS 2025)
+# [Optimal Stochastic Trace Estimation in Generative Modeling](https://www.arxiv.org/abs/2502.18808) (AISTATS 2025)
 
 By [Xinyang Liu](https://xinyangatk.github.io)\*<sup>1</sup>, [Hengrong Du](https://hengrongdu.netlify.app)\*<sup>2</sup> , [Wei Deng](https://www.weideng.org)<sup>3</sup>, [Ruqi Zhang](https://ruqizhang.github.io)<sup>1</sup>
 \
