@@ -36,13 +36,16 @@ We provide the details in README.md for each projects.
 ## Acknowledgements
 This repository was heavily built off of [FFJORD](https://github.com/rtqichen/ffjord), [SB-FBSDE](https://github.com/ghliu/SB-FBSDE) and [VSDM](https://github.com/WayneDW/Variational_Schrodinger_Diffusion_Model).
 
-<!-- <a name="citation"></a>
+<a name="citation"></a>
 ## Citation
 ```
-@article{liu2024advancing,
-  title={Advancing Graph Generation through Beta Diffusion},
-  author={Liu, Xinyang and He, Yilin and Chen, Bo and Zhou, Mingyuan},
-  journal={arXiv preprint arXiv:2406.09357},
-  year={2024}
+@misc{liu2025optimalstochastictraceestimation,
+      title={Optimal Stochastic Trace Estimation in Generative Modeling}, 
+      author={Xinyang Liu and Hengrong Du and Wei Deng and Ruqi Zhang},
+      year={2025},
+      eprint={2502.18808},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG},
+      url={https://arxiv.org/abs/2502.18808}, 
 }
-``` -->
+```
