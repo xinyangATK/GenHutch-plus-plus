@@ -39,13 +39,10 @@ This repository was heavily built off of [FFJORD](https://github.com/rtqichen/ff
 <a name="citation"></a>
 ## Citation
 ```
-@misc{liu2025optimalstochastictraceestimation,
-      title={Optimal Stochastic Trace Estimation in Generative Modeling}, 
-      author={Xinyang Liu and Hengrong Du and Wei Deng and Ruqi Zhang},
-      year={2025},
-      eprint={2502.18808},
-      archivePrefix={arXiv},
-      primaryClass={cs.LG},
-      url={https://arxiv.org/abs/2502.18808}, 
+@article{liu2025optimal,
+  title={Optimal Stochastic Trace Estimation in Generative Modeling},
+  author={Liu, Xinyang and Du, Hengrong and Deng, Wei and Zhang, Ruqi},
+  journal={arXiv preprint arXiv:2502.18808},
+  year={2025}
 }
 ```
